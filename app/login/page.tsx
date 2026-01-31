@@ -22,7 +22,7 @@ const LoginPage = async () => {
         />
         <h1 className="max-auto mb-3 text-4xl">Bem vindo!</h1>
         <p className="text-muted-forground m-8">
-          Scalercio Finance é uma plataforma de gestão financeira. que utiliza
+          Scalercio Finance é uma plataforma de gestão financeira, que utiliza
           IA para monitorar sua movimentações e oeferer insights personalizados,
           para facilitar o controle do seu dinheiro.
         </p>
