@@ -1,47 +1,60 @@
 import Image from "next/image";
-import { Button } from "../_components/ui/button";
+import { redirect } from "next/navigation";
 import { LogInIcon } from "lucide-react";
 import { SignInButton } from "@clerk/nextjs";
 import { auth } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
+
+import { Button } from "../_components/ui/button";
 
 const LoginPage = async () => {
   const { userId } = await auth();
+
   if (userId) {
     redirect("/");
   }
+
   return (
-    <div className="grid h-full grid-cols-2">
-      <div className="max-w-[500px]: mx-auto flex h-full flex-col justify-center p-8 text-center">
+    <main className="grid min-h-screen grid-cols-1 bg-background md:grid-cols-2">
+      <section className="flex flex-col items-center justify-center px-6 py-12 text-center md:px-12">
         <Image
-          className="mx-auto mb-8"
           src="/logo_login.png"
           alt="Logo Scalercio"
-          width={200}
-          height={200}
+          width={160}
+          height={160}
+          priority
+          className="mb-10"
         />
-        <h1 className="max-auto mb-3 text-4xl">Bem vindo!</h1>
-        <p className="text-muted-forground m-8">
-          Scalercio Finance é uma plataforma de gestão financeira, que utiliza
-          IA para monitorar sua movimentações e oeferer insights personalizados,
-          para facilitar o controle do seu dinheiro.
+
+        <h1 className="mb-4 text-4xl font-semibold tracking-tight">
+          Bem-vindo!
+        </h1>
+
+        <p className="mb-10 max-w-md text-sm leading-relaxed text-muted-foreground">
+          Scalercio Finance é uma plataforma de gestão financeira que utiliza IA
+          para monitorar suas movimentações e oferecer insights personalizados,
+          facilitando o controle do seu dinheiro.
         </p>
+
         <SignInButton>
-          <Button variant="outline">
-            <LogInIcon className="mr-2" />
+          <Button variant="outline" size="lg" className="gap-2">
+            <LogInIcon className="h-4 w-4" />
             Fazer login ou criar uma conta
           </Button>
         </SignInButton>
-      </div>
-      <div className="relative h-full w-full">
-        <Image
-          className="object-cover"
-          src="/login.png"
-          alt="Faça Login"
-          fill
-        />
-      </div>
-    </div>
+      </section>
+      <section className="relative hidden items-center justify-center md:flex">
+        <div className="relative h-80 w-80">
+          <Image
+            src="/login.png"
+            alt="Preview do aplicativo"
+            fill
+            priority
+            sizes="(min-width: 1024px) 100vw, 100vw"
+            className="object-cover"
+          />
+        </div>
+      </section>
+    </main>
   );
 };
 
