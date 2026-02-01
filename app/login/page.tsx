@@ -1,6 +1,5 @@
 import Image from "next/image";
 import { redirect } from "next/navigation";
-import { LogInIcon } from "lucide-react";
 import { SignInButton } from "@clerk/nextjs";
 import { auth } from "@clerk/nextjs/server";
 
@@ -37,8 +36,14 @@ const LoginPage = async () => {
 
         <SignInButton>
           <Button variant="outline" size="lg" className="gap-2">
-            <LogInIcon className="h-4 w-4" />
-            Fazer login ou criar uma conta
+            <Image
+              className="h-4 w-4"
+              src="/icon_google.png"
+              alt="Google"
+              width={18}
+              height={18}
+            />
+            - Fazer login ou criar uma conta
           </Button>
         </SignInButton>
       </section>
