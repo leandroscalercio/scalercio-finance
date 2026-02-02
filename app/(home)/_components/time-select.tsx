@@ -29,13 +29,15 @@ const TimeSelect = () => {
   const searchParams = useSearchParams();
   const month = searchParams.get("month");
 
+  const currentMonth = String(new Date().getMonth() + 1).padStart(2, "0");
+
   const handleMonthChange = (month: string) => {
     push(`/?month=${month}`);
   };
   return (
     <Select
       onValueChange={(value) => handleMonthChange(value)}
-      defaultValue={month ?? ""}
+      defaultValue={month ?? currentMonth}
     >
       <SelectTrigger className="w-[150px] rounded-full">
         <SelectValue placeholder="Mês" />

@@ -7,6 +7,7 @@ import { isMatch } from "date-fns";
 import TransactionsPieChart from "./_components/transactions-pie.chart";
 import { getDashboard } from "../_data/get-dashboard";
 import ExpensesPerCategory from "./_components/expense-per-category";
+import LastTransactions from "./_components/last-transactions";
 
 interface HomeProps {
   searchParams: {
@@ -21,7 +22,8 @@ const Home = async ({ searchParams: { month } }: HomeProps) => {
   }
   const monthIsInvalid = !month || isMatch(month, "MM") === false;
   if (monthIsInvalid) {
-    redirect("/?month=01");
+    const currentMonth = String(new Date().getMonth() + 1).padStart(2, "0");
+    redirect(`/?month=${currentMonth}`);
   }
 
   const dashboardData = await getDashboard(month);
@@ -30,18 +32,26 @@ const Home = async ({ searchParams: { month } }: HomeProps) => {
     <>
       <Navbar />
       <div className="space-y-6 p-6">
-        <div className="flex justify-between">
+        <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold">Dashboard</h1>
           <TimeSelect />
         </div>
-        <div className="grid grid-cols-[2fr,1fr]">
-          <SummaryCards month={month} {...dashboardData} />
-        </div>
-        <div className="grid grid-cols-3 grid-rows-1 gap-6">
-          <TransactionsPieChart {...dashboardData} />
-          <ExpensesPerCategory
-            expensesPerCategory={dashboardData.totalExpensePerCategory}
-          />
+        <div className="grid grid-cols-[1fr,1.2fr] gap-6">
+          <div className="space-y-6">
+            <SummaryCards month={month} {...dashboardData} />
+            <div className="grid grid-cols-2 gap-6">
+              <TransactionsPieChart {...dashboardData} />
+              <ExpensesPerCategory
+                expensesPerCategory={dashboardData.totalExpensePerCategory}
+              />
+            </div>
+          </div>
+
+          <div>
+            <LastTransactions
+              lastTransactions={dashboardData.lastTransactions}
+            />
+          </div>
         </div>
       </div>
     </>
