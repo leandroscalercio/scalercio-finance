@@ -27,7 +27,8 @@ const MONTH_OPTIONS = [
 const TimeSelect = () => {
   const { push } = useRouter();
   const searchParams = useSearchParams();
-  const month = searchParams.get("month");
+  const rawMonth = searchParams.get("month");
+  const month = rawMonth ? String(rawMonth).padStart(2, "0") : undefined;
 
   const currentMonth = String(new Date().getMonth() + 1).padStart(2, "0");
 
@@ -37,7 +38,7 @@ const TimeSelect = () => {
   return (
     <Select
       onValueChange={(value) => handleMonthChange(value)}
-      defaultValue={month ?? currentMonth}
+      value={month ?? currentMonth}
     >
       <SelectTrigger className="w-[150px] rounded-full">
         <SelectValue placeholder="Mês" />
@@ -45,7 +46,12 @@ const TimeSelect = () => {
       <SelectContent>
         {MONTH_OPTIONS.map((option) => (
           <SelectItem key={option.value} value={option.value}>
-            {option.label}
+            <div className="flex w-full items-center justify-between">
+              <span>{option.label}</span>
+              {option.value === currentMonth ? (
+                <span className="ml-2 rounded-full bg-green-600 px-2 py-0.5 text-xs font-semibold text-white"></span>
+              ) : null}
+            </div>
           </SelectItem>
         ))}
       </SelectContent>

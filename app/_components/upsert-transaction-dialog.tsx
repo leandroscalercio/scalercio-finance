@@ -85,7 +85,7 @@ const UpsertTransactionDialog = ({
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: defaultValues ?? {
-      amount: 50,
+      amount: 0,
       category: TransactionCategory.OTHER,
       date: new Date(),
       name: "",
@@ -156,6 +156,13 @@ const UpsertTransactionDialog = ({
                         floatValue?: number;
                       }) => field.onChange(floatValue)}
                       onBlur={field.onBlur}
+                      onFocus={(e) => {
+                        if (field.value === 0 || field.value === undefined) {
+                          field.onChange(undefined);
+                        } else {
+                          (e.target as HTMLInputElement).select();
+                        }
+                      }}
                       disabled={field.disabled}
                     />
                   </FormControl>
