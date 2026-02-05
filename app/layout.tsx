@@ -21,15 +21,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${roboto.className} dark antialiased`}>
+    <html lang="en" className="h-full w-full">
+      <body
+        className={`${roboto.className} dark min-h-screen w-full overflow-x-hidden antialiased`}
+      >
         <ClerkProvider
           appearance={{
             baseTheme: dark,
           }}
         >
-          <div className="flex h-full flex-col overflow-hidden">{children}</div>
+          <div className="flex min-h-screen w-full flex-col overflow-x-hidden">
+            {children}
+          </div>
         </ClerkProvider>
+
         <Toaster />
       </body>
     </html>

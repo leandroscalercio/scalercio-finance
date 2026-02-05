@@ -35,15 +35,25 @@ const TimeSelect = () => {
   const handleMonthChange = (month: string) => {
     push(`/?month=${month}`);
   };
+
+  const selectedLabel =
+    MONTH_OPTIONS.find((opt) => opt.value === (month ?? currentMonth))?.label ??
+    "Mês";
+
   return (
     <Select
       onValueChange={(value) => handleMonthChange(value)}
       value={month ?? currentMonth}
     >
-      <SelectTrigger className="w-[150px] rounded-full">
-        <SelectValue placeholder="Mês" />
+      <SelectTrigger className="w-[110px] rounded-full px-3 text-xs sm:w-[150px] sm:px-4 sm:text-sm">
+        <SelectValue placeholder="Mês">
+          <span className="block max-w-[70px] truncate sm:max-w-none">
+            {selectedLabel}
+          </span>
+        </SelectValue>
       </SelectTrigger>
-      <SelectContent>
+
+      <SelectContent className="max-h-[280px]">
         {MONTH_OPTIONS.map((option) => (
           <SelectItem key={option.value} value={option.value}>
             <div className="flex w-full items-center justify-between">

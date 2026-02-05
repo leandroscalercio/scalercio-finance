@@ -17,35 +17,41 @@ export const transactionColumns: ColumnDef<Transaction>[] = [
   },
   {
     accessorKey: "type",
-    header: "Tipo",
+    header: () => <span className="hidden md:inline">Tipo</span>,
     cell: ({ row: { original: transaction } }) => (
-      <TransactionTypeBadge transaction={transaction} />
+      <div className="hidden md:block">
+        <TransactionTypeBadge transaction={transaction} />
+      </div>
     ),
   },
   {
     accessorKey: "category",
-    header: "Categoria",
-    cell: ({ row: { original: transaction } }) =>
-      TRANSACTION_CATEGORY_LABELS[transaction.category],
+    header: () => <span className="hidden md:inline">Categoria</span>,
+    cell: ({ row: { original: transaction } }) => (
+      <span className="hidden md:inline">
+        {TRANSACTION_CATEGORY_LABELS[transaction.category]}
+      </span>
+    ),
   },
   {
     accessorKey: "paymentMethod",
-    header: "Método de Pagamento",
-    cell: ({ row: { original: transaction } }) =>
-      TRANSACTION_PAYMENT_METHOD_LABELS[transaction.paymentMethod],
+    header: () => <span className="hidden md:inline">Método de Pagamento</span>,
+    cell: ({ row: { original: transaction } }) => (
+      <span className="hidden md:inline">
+        {TRANSACTION_PAYMENT_METHOD_LABELS[transaction.paymentMethod]}
+      </span>
+    ),
   },
-
   {
     accessorKey: "date",
     header: "Data",
     cell: ({ row: { original: transaction } }) =>
       new Date(transaction.date).toLocaleDateString("pt-BR", {
         day: "2-digit",
-        month: "long",
+        month: "2-digit",
         year: "numeric",
       }),
   },
-
   {
     accessorKey: "amount",
     header: "Valor",
@@ -55,17 +61,14 @@ export const transactionColumns: ColumnDef<Transaction>[] = [
         currency: "BRL",
       }).format(Number(transaction.amount)),
   },
-
   {
     accessorKey: "actions",
     header: "Ações",
-    cell: ({ row: { original: trasaction } }) => {
-      return (
-        <div className="space-x-1">
-          <EditTransactionButton transaction={trasaction} />
-          <DeleteTransactionButton transactionId={trasaction.id} />
-        </div>
-      );
-    },
+    cell: ({ row: { original: trasaction } }) => (
+      <div className="space-x-1">
+        <EditTransactionButton transaction={trasaction} />
+        <DeleteTransactionButton transactionId={trasaction.id} />
+      </div>
+    ),
   },
 ];
