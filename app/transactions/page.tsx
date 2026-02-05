@@ -36,12 +36,10 @@ const TransactionsPage = async () => {
 
         <ScrollArea className="w-full">
           <div className="w-full overflow-x-auto md:overflow-x-visible">
-            <div className="min-w-[900px] md:min-w-0">
-              <DataTable
-                columns={transactionColumns}
-                data={JSON.parse(JSON.stringify(transactions))}
-              />
-            </div>
+            <DataTable
+              columns={transactionColumns}
+              data={JSON.parse(JSON.stringify(transactions))}
+            />
           </div>
         </ScrollArea>
       </div>

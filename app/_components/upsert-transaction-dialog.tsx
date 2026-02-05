@@ -117,7 +117,7 @@ const UpsertTransactionDialog = ({
       }}
     >
       <DialogTrigger asChild></DialogTrigger>
-      <DialogContent>
+      <DialogContent className="max-h-[85dvh] overflow-y-auto pb-[calc(env(safe-area-inset-bottom)+16px)]">
         <DialogHeader>
           <DialogTitle>
             {isUpdate ? "Atualizar" : "Criar"} transação
@@ -262,7 +262,7 @@ const UpsertTransactionDialog = ({
                 </FormItem>
               )}
             />
-            <DialogFooter>
+            <DialogFooter className="pb-[env(safe-area-inset-bottom)]">
               <DialogClose asChild>
                 <Button type="button" variant="outline">
                   Cancelar

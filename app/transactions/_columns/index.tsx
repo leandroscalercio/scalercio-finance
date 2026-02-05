@@ -17,11 +17,19 @@ export const transactionColumns: ColumnDef<Transaction>[] = [
   },
   {
     accessorKey: "type",
-    header: () => <span className="hidden md:inline">Tipo</span>,
+    header: () => (
+      <>
+        <span className="md:hidden">—</span>
+        <span className="hidden md:inline">Tipo</span>
+      </>
+    ),
     cell: ({ row: { original: transaction } }) => (
-      <div className="hidden md:block">
-        <TransactionTypeBadge transaction={transaction} />
-      </div>
+      <>
+        <div className="hidden md:hidden" />
+        <div className="hidden md:block">
+          <TransactionTypeBadge transaction={transaction} />
+        </div>
+      </>
     ),
   },
   {
@@ -44,13 +52,21 @@ export const transactionColumns: ColumnDef<Transaction>[] = [
   },
   {
     accessorKey: "date",
-    header: "Data",
-    cell: ({ row: { original: transaction } }) =>
-      new Date(transaction.date).toLocaleDateString("pt-BR", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-      }),
+    header: () => (
+      <>
+        <span className="hidden md:hidden" />
+        <span className="hidden md:inline">Data</span>
+      </>
+    ),
+    cell: ({ row: { original: transaction } }) => (
+      <span className="hidden md:inline">
+        {new Date(transaction.date).toLocaleDateString("pt-BR", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+        })}
+      </span>
+    ),
   },
   {
     accessorKey: "amount",
@@ -65,7 +81,7 @@ export const transactionColumns: ColumnDef<Transaction>[] = [
     accessorKey: "actions",
     header: "Ações",
     cell: ({ row: { original: trasaction } }) => (
-      <div className="space-x-1">
+      <div className="flex gap-1">
         <EditTransactionButton transaction={trasaction} />
         <DeleteTransactionButton transactionId={trasaction.id} />
       </div>

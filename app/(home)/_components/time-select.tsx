@@ -45,11 +45,9 @@ const TimeSelect = () => {
       onValueChange={(value) => handleMonthChange(value)}
       value={month ?? currentMonth}
     >
-      <SelectTrigger className="w-[110px] rounded-full px-3 text-xs sm:w-[150px] sm:px-4 sm:text-sm">
+      <SelectTrigger className="h-8 w-full rounded-full px-2 text-[11px] sm:h-auto sm:w-[150px] sm:px-4 sm:text-sm">
         <SelectValue placeholder="Mês">
-          <span className="block max-w-[70px] truncate sm:max-w-none">
-            {selectedLabel}
-          </span>
+          <span className="block max-w-full truncate">{selectedLabel}</span>
         </SelectValue>
       </SelectTrigger>
 
