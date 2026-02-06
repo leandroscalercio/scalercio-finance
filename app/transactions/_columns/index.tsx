@@ -15,13 +15,12 @@ export const transactionColumns: ColumnDef<Transaction>[] = [
     accessorKey: "name",
     header: "Nome",
     cell: ({ row: { original } }) => (
-      <span className="block max-w-[140px] truncate sm:max-w-none">
+      <span className="block max-w-[96px] truncate sm:max-w-none">
         {original.name}
       </span>
     ),
   },
 
-  // Desktop only
   {
     accessorKey: "type",
     header: () => <span className="hidden md:inline">Tipo</span>,
@@ -31,7 +30,7 @@ export const transactionColumns: ColumnDef<Transaction>[] = [
       </div>
     ),
   },
-  // Desktop only
+
   {
     accessorKey: "category",
     header: () => <span className="hidden md:inline">Categoria</span>,
@@ -41,7 +40,7 @@ export const transactionColumns: ColumnDef<Transaction>[] = [
       </span>
     ),
   },
-  // Desktop only
+
   {
     accessorKey: "paymentMethod",
     header: () => <span className="hidden md:inline">Método de Pagamento</span>,
@@ -51,7 +50,7 @@ export const transactionColumns: ColumnDef<Transaction>[] = [
       </span>
     ),
   },
-  // Desktop only
+
   {
     accessorKey: "date",
     header: () => <span className="hidden md:inline">Data</span>,
@@ -69,12 +68,12 @@ export const transactionColumns: ColumnDef<Transaction>[] = [
   {
     accessorKey: "amount",
     header: "Valor",
-    cell: ({ row: { original: transaction } }) => (
-      <span className="whitespace-nowrap">
+    cell: ({ row: { original } }) => (
+      <span className="block whitespace-nowrap text-right">
         {new Intl.NumberFormat("pt-BR", {
           style: "currency",
           currency: "BRL",
-        }).format(Number(transaction.amount))}
+        }).format(Number(original.amount))}
       </span>
     ),
   },
@@ -82,10 +81,10 @@ export const transactionColumns: ColumnDef<Transaction>[] = [
   {
     id: "actions",
     header: () => <span className="whitespace-nowrap">Ações</span>,
-    cell: ({ row: { original: transaction } }) => (
-      <div className="flex min-w-[64px] justify-end gap-1">
-        <EditTransactionButton transaction={transaction} />
-        <DeleteTransactionButton transactionId={transaction.id} />
+    cell: ({ row: { original } }) => (
+      <div className="flex min-w-[72px] justify-end gap-1">
+        <EditTransactionButton transaction={original} />
+        <DeleteTransactionButton transactionId={original.id} />
       </div>
     ),
   },

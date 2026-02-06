@@ -13,22 +13,22 @@ const LoginPage = async () => {
   }
 
   return (
-    <main className="grid min-h-screen grid-cols-1 bg-background md:grid-cols-2">
-      <section className="flex flex-col items-center justify-center px-6 py-12 text-center md:px-12">
+    <main className="grid h-screen grid-cols-1 overflow-hidden bg-background md:grid-cols-2">
+      <section className="flex flex-col items-center justify-center px-6 py-8 text-center sm:py-10 md:px-12 md:py-12">
         <Image
           src="/logo_login.png"
           alt="Logo Scalercio"
           width={160}
           height={160}
           priority
-          className="mb-10"
+          className="mb-8"
         />
 
         <h1 className="mb-4 text-4xl font-semibold tracking-tight">
           Bem-vindo!
         </h1>
 
-        <p className="mb-10 max-w-md text-sm leading-relaxed text-muted-foreground">
+        <p className="mb-8 max-w-md text-sm leading-relaxed text-muted-foreground">
           Scalercio Finance é uma plataforma de gestão financeira que utiliza IA
           para monitorar suas movimentações e oferecer insights personalizados,
           facilitando o controle do seu dinheiro.
@@ -43,10 +43,11 @@ const LoginPage = async () => {
               width={18}
               height={18}
             />
-            - Fazer login ou criar uma conta
+            Fazer login ou criar uma conta
           </Button>
         </SignInButton>
       </section>
+
       <section className="relative hidden items-center justify-center md:flex">
         <div className="relative h-80 w-80">
           <Image
