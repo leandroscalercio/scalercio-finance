@@ -14,24 +14,24 @@ export const transactionColumns: ColumnDef<Transaction>[] = [
   {
     accessorKey: "name",
     header: "Nome",
+    cell: ({ row: { original } }) => (
+      <span className="block max-w-[140px] truncate sm:max-w-none">
+        {original.name}
+      </span>
+    ),
   },
+
+  // Desktop only
   {
     accessorKey: "type",
-    header: () => (
-      <>
-        <span className="md:hidden">—</span>
-        <span className="hidden md:inline">Tipo</span>
-      </>
-    ),
+    header: () => <span className="hidden md:inline">Tipo</span>,
     cell: ({ row: { original: transaction } }) => (
-      <>
-        <div className="hidden md:hidden" />
-        <div className="hidden md:block">
-          <TransactionTypeBadge transaction={transaction} />
-        </div>
-      </>
+      <div className="hidden md:block">
+        <TransactionTypeBadge transaction={transaction} />
+      </div>
     ),
   },
+  // Desktop only
   {
     accessorKey: "category",
     header: () => <span className="hidden md:inline">Categoria</span>,
@@ -41,6 +41,7 @@ export const transactionColumns: ColumnDef<Transaction>[] = [
       </span>
     ),
   },
+  // Desktop only
   {
     accessorKey: "paymentMethod",
     header: () => <span className="hidden md:inline">Método de Pagamento</span>,
@@ -50,14 +51,10 @@ export const transactionColumns: ColumnDef<Transaction>[] = [
       </span>
     ),
   },
+  // Desktop only
   {
     accessorKey: "date",
-    header: () => (
-      <>
-        <span className="hidden md:hidden" />
-        <span className="hidden md:inline">Data</span>
-      </>
-    ),
+    header: () => <span className="hidden md:inline">Data</span>,
     cell: ({ row: { original: transaction } }) => (
       <span className="hidden md:inline">
         {new Date(transaction.date).toLocaleDateString("pt-BR", {
@@ -68,22 +65,27 @@ export const transactionColumns: ColumnDef<Transaction>[] = [
       </span>
     ),
   },
+
   {
     accessorKey: "amount",
     header: "Valor",
-    cell: ({ row: { original: transaction } }) =>
-      new Intl.NumberFormat("pt-BR", {
-        style: "currency",
-        currency: "BRL",
-      }).format(Number(transaction.amount)),
+    cell: ({ row: { original: transaction } }) => (
+      <span className="whitespace-nowrap">
+        {new Intl.NumberFormat("pt-BR", {
+          style: "currency",
+          currency: "BRL",
+        }).format(Number(transaction.amount))}
+      </span>
+    ),
   },
+
   {
-    accessorKey: "actions",
-    header: "Ações",
-    cell: ({ row: { original: trasaction } }) => (
-      <div className="flex gap-1">
-        <EditTransactionButton transaction={trasaction} />
-        <DeleteTransactionButton transactionId={trasaction.id} />
+    id: "actions",
+    header: () => <span className="whitespace-nowrap">Ações</span>,
+    cell: ({ row: { original: transaction } }) => (
+      <div className="flex min-w-[64px] justify-end gap-1">
+        <EditTransactionButton transaction={transaction} />
+        <DeleteTransactionButton transactionId={transaction.id} />
       </div>
     ),
   },

@@ -4,12 +4,8 @@ import { ArrowDownUpIcon } from "lucide-react";
 import { Button } from "./ui/button";
 import { useState } from "react";
 import UpsertTransactionDialog from "./upsert-transaction-dialog";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "./ui/tooltip";
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+import Link from "next/link";
 
 interface AddTransactionButtonProps {
   userCanAddTransaction?: boolean;
@@ -19,27 +15,50 @@ const AddTransactionButton = ({
   userCanAddTransaction,
 }: AddTransactionButtonProps) => {
   const [dialogIsOpen, setDialogIsOpen] = useState(false);
+  const [popoverOpen, setPopoverOpen] = useState(false);
+
+  const isDisabled = !userCanAddTransaction;
+
+  const handleClick = () => {
+    if (isDisabled) {
+      setPopoverOpen(true);
+      return;
+    }
+
+    setDialogIsOpen(true);
+  };
 
   return (
     <>
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              className="rounded-full font-bold"
-              onClick={() => setDialogIsOpen(true)}
-              disabled={!userCanAddTransaction}
-            >
+      <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+        <PopoverTrigger asChild>
+          <span className="inline-flex" onClick={handleClick}>
+            <Button className="rounded-full font-bold" disabled={isDisabled}>
               Adicionar transação
               <ArrowDownUpIcon />
             </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            {!userCanAddTransaction &&
-              "Você atingiu o limite de transações. Atualize seu plano para criar transações ilimitadas."}
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+          </span>
+        </PopoverTrigger>
+
+        {isDisabled && (
+          <PopoverContent
+            side="top"
+            align="center"
+            className="w-auto rounded-md px-3 py-2 text-center text-xs font-medium shadow-md"
+          >
+            <p className="mb-1">Assine o Premium!</p>
+
+            <Link
+              href="/subscription"
+              className="text-primary underline underline-offset-2 hover:opacity-80"
+              onClick={() => setPopoverOpen(false)}
+            >
+              Ver planos
+            </Link>
+          </PopoverContent>
+        )}
+      </Popover>
+
       <UpsertTransactionDialog
         isOpen={dialogIsOpen}
         setIsOpen={setDialogIsOpen}
