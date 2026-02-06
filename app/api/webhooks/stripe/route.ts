@@ -1,59 +1,22 @@
-import { clerkClient } from "@clerk/nextjs/server";
-import { NextResponse } from "next/server";
 import Stripe from "stripe";
+import { NextResponse } from "next/server";
+import { clerkClient } from "@clerk/nextjs/server";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
-  apiVersion: "2025-02-24.acacia",
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "", {
+  apiVersion: "2026-01-28.clover" as Stripe.LatestApiVersion,
 });
 
-async function getClerkUserIdFromInvoice(
-  invoice: unknown,
-  subscriptionId?: string,
-): Promise<string | null> {
-  if (!invoice || typeof invoice !== "object") {
-    return null;
-  }
+async function updateClerkUserSubscription(params: {
+  clerkUserId: string;
+  plan: "premium" | null;
+  stripeCustomerId: string | null;
+  stripeSubscriptionId: string | null;
+}) {
+  const { clerkUserId, plan, stripeCustomerId, stripeSubscriptionId } = params;
 
-  const inv = invoice as {
-    subscription_details?: { metadata?: { clerk_user_id: string } };
-    lines?: { data: { metadata?: { clerk_user_id: string } }[] };
-    subscription?: string;
-  };
-
-  const clerkUserId = inv.subscription_details?.metadata?.clerk_user_id;
-  if (clerkUserId) {
-    return clerkUserId;
-  }
-
-  if (inv.lines?.data?.[0]?.metadata?.clerk_user_id) {
-    return inv.lines.data[0].metadata.clerk_user_id;
-  }
-
-  if (subscriptionId || inv.subscription) {
-    const subId = subscriptionId || inv.subscription;
-    if (subId) {
-      try {
-        const sub = await stripe.subscriptions.retrieve(subId);
-        if (sub.metadata?.clerk_user_id) {
-          return sub.metadata.clerk_user_id;
-        }
-      } catch {
-        return null;
-      }
-    }
-  }
-
-  return null;
-}
-
-async function updateClerkUserSubscription(
-  clerkUserId: string,
-  stripeCustomerId: string,
-  stripeSubscriptionId: string,
-): Promise<void> {
-  await clerkClient().users.updateUserMetadata(clerkUserId, {
+  await clerkClient.users.updateUserMetadata(clerkUserId, {
     publicMetadata: {
-      subscriptionPlan: "premium",
+      subscriptionPlan: plan,
     },
     privateMetadata: {
       stripeCustomerId,
@@ -62,23 +25,21 @@ async function updateClerkUserSubscription(
   });
 }
 
-async function removeClerkUserSubscription(clerkUserId: string): Promise<void> {
-  await clerkClient().users.updateUserMetadata(clerkUserId, {
-    publicMetadata: {
-      subscriptionPlan: null,
-    },
-    privateMetadata: {
-      stripeCustomerId: null,
-      stripeSubscriptionId: null,
-    },
-  });
+function getStringId(value: unknown): string | null {
+  return typeof value === "string" && value.length > 0 ? value : null;
 }
 
 export const POST = async (request: Request) => {
   try {
-    if (!process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_WEBHOOK_SECRET) {
+    if (!process.env.STRIPE_SECRET_KEY) {
       return NextResponse.json(
-        { error: "Missing environment variables" },
+        { error: "Missing STRIPE_SECRET_KEY" },
+        { status: 500 },
+      );
+    }
+    if (!process.env.STRIPE_WEBHOOK_SECRET) {
+      return NextResponse.json(
+        { error: "Missing STRIPE_WEBHOOK_SECRET" },
         { status: 500 },
       );
     }
@@ -86,72 +47,123 @@ export const POST = async (request: Request) => {
     const signature = request.headers.get("stripe-signature");
     if (!signature) {
       return NextResponse.json(
-        { error: "Missing stripe signature" },
+        { error: "Missing stripe-signature header" },
         { status: 400 },
       );
     }
 
-    const text = await request.text();
+    const payload = await request.text();
+
     const event = stripe.webhooks.constructEvent(
-      text,
+      payload,
       signature,
       process.env.STRIPE_WEBHOOK_SECRET,
     );
 
     switch (event.type) {
-      case "invoice.payment_succeeded":
-      case "invoice.paid": {
-        const invoiceData = event.data.object as unknown;
+      case "checkout.session.completed": {
+        const session = event.data.object as Stripe.Checkout.Session;
 
-        if (!invoiceData || typeof invoiceData !== "object") {
-          return NextResponse.json(
-            { error: "Invalid invoice data" },
-            { status: 400 },
-          );
-        }
-
-        const invoice = invoiceData as {
-          customer?: string;
-          subscription?: string;
-        };
-        const customer = invoice.customer || "";
-        const subscription = invoice.subscription || "";
-
-        const clerkUserId = await getClerkUserIdFromInvoice(invoiceData);
+        const clerkUserId =
+          session.metadata?.clerk_user_id ??
+          (typeof session.client_reference_id === "string"
+            ? session.client_reference_id
+            : null);
 
         if (!clerkUserId) {
           return NextResponse.json(
-            { error: "No clerk_user_id found" },
+            { error: "No clerk_user_id found in checkout session" },
             { status: 400 },
           );
         }
 
-        await updateClerkUserSubscription(clerkUserId, customer, subscription);
+        const stripeCustomerId = getStringId(session.customer);
+        const stripeSubscriptionId = getStringId(session.subscription);
+
+        await updateClerkUserSubscription({
+          clerkUserId,
+          plan: "premium",
+          stripeCustomerId,
+          stripeSubscriptionId,
+        });
+
+        break;
+      }
+
+      case "invoice.paid": {
+        const invoice = event.data.object as Stripe.Invoice;
+
+        const stripeSubscriptionId = getStringId(invoice.subscription);
+        if (!stripeSubscriptionId) break;
+
+        const sub = await stripe.subscriptions.retrieve(stripeSubscriptionId);
+        const clerkUserId = sub.metadata?.clerk_user_id ?? null;
+
+        if (!clerkUserId) {
+          return NextResponse.json(
+            {
+              error:
+                "No clerk_user_id found in subscription metadata (invoice.paid)",
+            },
+            { status: 400 },
+          );
+        }
+
+        const stripeCustomerId = getStringId(invoice.customer);
+
+        await updateClerkUserSubscription({
+          clerkUserId,
+          plan: "premium",
+          stripeCustomerId,
+          stripeSubscriptionId,
+        });
+
+        break;
+      }
+
+      case "customer.subscription.updated": {
+        const sub = event.data.object as Stripe.Subscription;
+
+        const clerkUserId = sub.metadata?.clerk_user_id ?? null;
+        if (!clerkUserId) break;
+
+        const stripeCustomerId = getStringId(sub.customer);
+        const isActive = ["active", "trialing"].includes(sub.status);
+
+        await updateClerkUserSubscription({
+          clerkUserId,
+          plan: isActive ? "premium" : null,
+          stripeCustomerId,
+          stripeSubscriptionId: sub.id,
+        });
+
         break;
       }
 
       case "customer.subscription.deleted": {
-        const subscription = await stripe.subscriptions.retrieve(
-          event.data.object.id,
-        );
-        const clerkUserId = subscription.metadata?.clerk_user_id;
+        const sub = event.data.object as Stripe.Subscription;
 
-        if (!clerkUserId) {
-          return NextResponse.json(
-            { error: "No clerk_user_id found" },
-            { status: 400 },
-          );
-        }
+        const clerkUserId = sub.metadata?.clerk_user_id ?? null;
+        if (!clerkUserId) break;
 
-        await removeClerkUserSubscription(clerkUserId);
+        await updateClerkUserSubscription({
+          clerkUserId,
+          plan: null,
+          stripeCustomerId: null,
+          stripeSubscriptionId: null,
+        });
+
         break;
       }
+
+      default:
+        break;
     }
 
-    return NextResponse.json({ received: true });
-  } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Internal server error";
-    return NextResponse.json({ error: errorMessage }, { status: 500 });
+    return NextResponse.json({ received: true }, { status: 200 });
+  } catch (err) {
+    const message =
+      err instanceof Error ? err.message : "Internal server error";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 };
